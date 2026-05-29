@@ -2,6 +2,7 @@
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
   status = 200
+  force = true
