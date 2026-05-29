@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sandra 2.0 — DAS HOTEL entsteht</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green-deep: #0d1a14;
+    --brass: #b8935a;
+    --brass-light: #d4a96a;
+    --brass-pale: #e8c98a;
+    --amber: #c4762a;
+    --cream: #f0e8d8;
+    --soft: rgba(240,232,216,0.72);
+    --dim: rgba(240,232,216,0.32);
+  }
+  html { font-size: 16px; }
+  body { background: var(--green-deep); color: var(--cream); font-family: 'Cormorant Garamond', serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 999; opacity: 0.45; }
+  .glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(140px); background: radial-gradient(circle, #c4762a, transparent 70%); }
+  .glow-1 { width: 700px; height: 700px; bottom: -200px; right: -200px; opacity: 0.05; }
+  .glow-2 { width: 400px; height: 400px; top: -100px; left: -100px; opacity: 0.025; }
+
+  .screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; animation: fadeIn 0.9s ease forwards; }
+  .screen.active { display: flex; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .hdr { width:100%; padding:44px 48px 28px; border-bottom:1px solid rgba(184,147,90,0.12); position:relative; }
+  .hdr::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--brass),transparent); }
+  .hdr-eye { font-size:9px; letter-spacing:0.38em; text-transform:uppercase; color:var(--brass); margin-bottom:6px; }
+  .hdr-badge { display:inline-flex; align-items:center; gap:7px; margin-bottom:10px; }
+  .hdr-badge-dot { width:6px; height:6px; border-radius:50%; background:var(--amber); box-shadow:0 0 7px var(--amber); animation:pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.2)} }
+  .hdr-badge-label { font-size:9px; letter-spacing:0.3em; text-transform:uppercase; color:var(--amber); }
+  .hdr-title { font-family:'IM Fell English',serif; font-size:clamp(26px,4vw,42px); color:var(--brass-light); line-height:1.1; margin-bottom:5px; }
+  .hdr-sub { font-style:italic; font-size:15px; color:var(--soft); }
+  .hdr-num { font-family:'IM Fell English',serif; font-size:clamp(52px,8vw,88px); color:transparent; -webkit-text-stroke:1px rgba(184,147,90,0.14); position:absolute; right:48px; top:20px; pointer-events:none; line-height:1; }
+
+  .cnt { width:100%; max-width:760px; padding:44px 48px 72px; flex:1; }
+  .intro { font-size:clamp(18px,2.3vw,23px); line-height:1.8; color:rgba(240,232,216,0.8); font-style:italic; border-left:2px solid rgba(184,147,90,0.3); padding-left:22px; margin-bottom:48px; }
+
+  .doors { display:flex; flex-direction:column; gap:10px; margin-bottom:44px; }
+  .door { background:rgba(255,255,255,0.018); border:1px solid rgba(184,147,90,0.18); padding:22px 56px 22px 28px; cursor:pointer; transition:all 0.25s ease; text-align:left; position:relative; font-family:'IM Fell English',serif; font-size:clamp(17px,2.2vw,22px); color:var(--cream); line-height:1.35; }
+  .door::after { content:'→'; position:absolute; right:22px; top:50%; transform:translateY(-50%) translateX(6px); color:var(--brass); opacity:0; transition:all 0.25s ease; font-family:'Cormorant Garamond',serif; font-size:18px; }
+  .door:hover { border-color:rgba(184,147,90,0.45); color:var(--cream); background:rgba(184,147,90,0.04); }
+  .door:hover::after { opacity:1; transform:translateY(-50%) translateX(0); }
+  .door.sel { border-color:var(--brass); color:var(--cream); background:rgba(184,147,90,0.06); }
+  .door.sel::after { opacity:1; transform:translateY(-50%) translateX(0); content:'◉'; font-size:13px; }
+  .door-num { display:block; font-family:'Cormorant Garamond',serif; font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:var(--brass); margin-bottom:5px; }
+
+  .chat-wrap { display:flex; flex-direction:column; gap:0; margin-bottom:28px; }
+  .msg { padding:20px 0; border-bottom:1px solid rgba(184,147,90,0.07); animation:msgIn 0.5s ease forwards; opacity:0; }
+  @keyframes msgIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+  .msg-sandra { padding-left:0; }
+  .msg-hotelier { padding-left:24px; border-left:2px solid rgba(184,147,90,0.22); }
+  .msg-label { font-size:9px; letter-spacing:0.32em; text-transform:uppercase; margin-bottom:8px; }
+  .msg-sandra .msg-label { color:var(--brass); }
+  .msg-hotelier .msg-label { color:var(--dim); }
+  .msg-text { font-family:'IM Fell English',serif; font-size:clamp(18px,2.3vw,24px); line-height:1.7; color:var(--cream); }
+  .msg-hotelier .msg-text { font-style:italic; color:rgba(240,232,216,0.88); font-size:clamp(16px,2vw,20px); }
+
+  .typing { display:flex; gap:5px; align-items:center; padding:18px 0; opacity:0; transition:opacity 0.3s; min-height:56px; }
+  .typing.show { opacity:1; }
+  .typing-dot { width:5px; height:5px; border-radius:50%; background:var(--brass); opacity:0.4; animation:typePulse 1.2s ease infinite; }
+  .typing-dot:nth-child(2){animation-delay:.2s} .typing-dot:nth-child(3){animation-delay:.4s}
+  @keyframes typePulse { 0%,100%{opacity:.2;transform:translateY(0)} 50%{opacity:.8;transform:translateY(-3px)} }
+
+  .input-area { position:relative; margin-bottom:8px; }
+  .input-area.locked { opacity:0.3; pointer-events:none; }
+  textarea { width:100%; background:rgba(255,255,255,0.025); border:1px solid rgba(184,147,90,0.22); border-radius:1px; color:var(--cream); font-family:'Cormorant Garamond',serif; font-size:19px; line-height:1.65; padding:16px 56px 16px 20px; resize:none; min-height:80px; outline:none; transition:border-color 0.3s,background 0.3s,box-shadow 0.3s; }
+  textarea::placeholder { color:var(--dim); font-style:italic; }
+  textarea:focus { border-color:rgba(184,147,90,0.5); background:rgba(184,147,90,0.03); box-shadow:0 0 20px rgba(184,147,90,0.04); }
+  .send-btn { position:absolute; right:14px; bottom:14px; background:transparent; border:1px solid rgba(184,147,90,0.35); color:var(--brass); width:36px; height:36px; cursor:pointer; font-size:16px; transition:all 0.2s ease; display:flex; align-items:center; justify-content:center; }
+  .send-btn:hover { background:rgba(184,147,90,0.12); border-color:var(--brass); }
+  .send-btn:disabled { opacity:0.28; cursor:not-allowed; }
+  .input-hint { font-size:11px; color:var(--dim); letter-spacing:0.1em; text-align:right; margin-bottom:20px; }
+
+  .zsf-box { display:none; margin:36px 0 0; }
+  .zsf-box.show { display:block; animation:fadeIn 0.8s ease forwards; }
+  .zsf-sandra { background:linear-gradient(135deg,rgba(184,147,90,0.08),rgba(184,147,90,0.03)); border:1px solid rgba(184,147,90,0.35); padding:28px 32px; position:relative; }
+  .zsf-sandra::before { content:'Sandra 2.0 — Was ich gehört habe'; position:absolute; top:-10px; left:22px; background:var(--green-deep); padding:0 10px; font-size:9px; letter-spacing:0.3em; text-transform:uppercase; color:var(--brass); }
+  .zsf-sandra-text { font-family:'IM Fell English',serif; font-style:italic; font-size:clamp(16px,2vw,20px); color:var(--cream); line-height:1.7; }
+  .zsf-eigene { border:1px solid rgba(184,147,90,0.2); border-top:none; padding:28px 32px; background:rgba(255,255,255,0.015); margin-bottom:28px; position:relative; }
+  .zsf-eigene::before { content:'Deine eigene Erkenntnis'; position:absolute; top:-10px; left:22px; background:var(--green-deep); padding:0 10px; font-size:9px; letter-spacing:0.3em; text-transform:uppercase; color:var(--dim); }
+  .zsf-eigene-hint { font-size:14px; font-style:italic; color:var(--soft); line-height:1.6; margin-bottom:14px; }
+  .zsf-eigene textarea { min-height:72px; font-size:16px; border-color:rgba(184,147,90,0.18); }
+
+  .div { width:100%; height:1px; background:linear-gradient(90deg,transparent,rgba(184,147,90,0.3),transparent); margin:40px 0; }
+  .mbox { background:rgba(184,147,90,0.04); border:1px solid rgba(184,147,90,0.18); padding:26px 30px; margin-bottom:40px; position:relative; }
+  .mbox::before { content:'◯'; position:absolute; right:22px; top:16px; font-size:24px; color:rgba(184,147,90,0.1); }
+  .mbox p { font-family:'IM Fell English',serif; font-style:italic; font-size:clamp(15px,1.7vw,17px); color:var(--brass-pale); line-height:1.75; }
+
+  .qblock { margin-bottom:40px; opacity:0; transform:translateY(12px); animation:fadeIn 0.55s ease forwards; }
+  .qblock:nth-child(1){animation-delay:.05s} .qblock:nth-child(2){animation-delay:.2s} .qblock:nth-child(3){animation-delay:.35s}
+  .qlabel { font-size:9px; letter-spacing:0.35em; text-transform:uppercase; color:var(--brass); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .qlabel::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(184,147,90,0.28),transparent); }
+  .qtext { font-family:'IM Fell English',serif; font-size:clamp(22px,3vw,32px); color:var(--cream); line-height:1.35; margin-bottom:16px; }
+  .qnote { font-size:15px; font-style:italic; color:rgba(240,232,216,0.55); margin-bottom:13px; line-height:1.6; }
+
+  .sofort { background:linear-gradient(135deg,rgba(184,147,90,.07),rgba(184,147,90,.02)); border:1px solid rgba(184,147,90,.3); padding:28px 32px; margin:24px 0; position:relative; }
+  .sofort::after { content:'AB MORGEN'; position:absolute; top:-9px; left:22px; background:var(--green-deep); padding:0 10px; font-size:9px; letter-spacing:.32em; color:var(--brass); }
+  .sofort textarea { min-height:52px; font-size:17px; border:none; border-bottom:1px solid rgba(184,147,90,.25); border-radius:0; padding:6px 0; background:transparent; }
+
+  .btn { display:inline-flex; align-items:center; gap:10px; background:transparent; border:1px solid var(--brass); color:var(--brass-light); font-family:'Cormorant Garamond',serif; font-size:12px; letter-spacing:.24em; text-transform:uppercase; padding:13px 28px; cursor:pointer; transition:all .28s ease; position:relative; overflow:hidden; }
+  .btn::before { content:''; position:absolute; inset:0; background:var(--brass); transform:scaleX(0); transform-origin:left; transition:transform .28s ease; z-index:-1; }
+  .btn:hover { color:var(--green-deep); }
+  .btn:hover::before { transform:scaleX(1); }
+  .btn:disabled { opacity:.28; cursor:not-allowed; }
+  .btn:disabled:hover { color:var(--brass-light); }
+  .btn:disabled:hover::before { transform:scaleX(0); }
+  .btn-ghost { background:transparent; border:none; color:var(--dim); font-family:'Cormorant Garamond',serif; font-size:12px; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; padding:13px 0; transition:color .25s; text-decoration:underline; text-underline-offset:4px; text-decoration-color:rgba(184,147,90,.18); }
+  .btn-ghost:hover { color:var(--brass); }
+  .btn-row { display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-top:32px; }
+
+  .e-card { border-left:2px solid var(--brass); padding:14px 20px; margin-bottom:12px; background:rgba(184,147,90,.03); opacity:0; animation:fadeIn .5s ease forwards; }
+  .e-label { font-size:9px; letter-spacing:.28em; text-transform:uppercase; color:var(--brass); margin-bottom:5px; }
+  .e-text { font-family:'IM Fell English',serif; font-style:italic; font-size:clamp(14px,1.7vw,17px); color:var(--soft); line-height:1.5; }
+
+  .final-wrap { text-align:center; padding:68px 48px; max-width:600px; margin:0 auto; }
+  .final-line { width:1px; height:52px; background:linear-gradient(transparent,var(--brass),transparent); margin:0 auto 28px; }
+  .final-logo { font-family:'IM Fell English',serif; font-size:clamp(20px,3vw,32px); color:var(--brass-light); margin-bottom:7px; }
+  .final-tag { font-style:italic; font-size:15px; color:var(--soft); margin-bottom:48px; }
+  .final-msg { font-family:'IM Fell English',serif; font-size:clamp(18px,2.4vw,26px); color:var(--cream); line-height:1.65; margin-bottom:24px; }
+  .final-sub { font-size:15px; color:var(--soft); line-height:1.8; margin-bottom:48px; font-style:italic; }
+  .final-mitnahme { margin-bottom:48px; text-align:left; }
+  .final-invite { border-top:1px solid rgba(184,147,90,.15); padding-top:40px; }
+  .final-invite-lbl { font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); margin-bottom:16px; }
+  .final-invite-txt { font-style:italic; color:var(--soft); font-size:15px; line-height:1.8; margin-bottom:32px; }
+
+  .error-msg { background:rgba(196,118,42,0.08); border:1px solid rgba(196,118,42,0.3); padding:16px 20px; margin-top:12px; font-size:14px; font-style:italic; color:var(--soft); display:none; }
+  .error-msg.show { display:block; }
+
+  @media(max-width:600px){
+    .hdr{padding:32px 24px 24px;} .hdr-num{right:24px;}
+    .cnt{padding:28px 24px 56px;}
+    .btn-row{flex-direction:column;align-items:flex-start;}
+    .final-wrap{padding:52px 24px;}
+  }
+</style>
+</head>
+<body>
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+<!-- ══════ LOBBY ══════ -->
+<div class="screen active" id="s-lobby">
+  <div class="hdr">
+    <div class="hdr-eye">DAS HOTEL entsteht</div>
+    <div class="hdr-num">0</div>
+    <div class="hdr-badge"><div class="hdr-badge-dot"></div><span class="hdr-badge-label">Sandra 2.0</span></div>
+    <div class="hdr-title">Willkommen</div>
+    <div class="hdr-sub">Schön dass du da bist</div>
+  </div>
+  <div class="cnt">
+    <div class="intro">
+      Dieser Raum gehört dir —<br>
+      solange du hier bist.
+    </div>
+
+    <div class="qblock">
+      <div class="qlabel">Was beschäftigt dich</div>
+      <div class="qtext">Was kann ich für dich tun?</div>
+      <div class="qnote">Was liegt gerade an — im Haus, bei den Gästen, bei dir. Alles darf sein.</div>
+      <textarea id="l-thema" placeholder="Schreib es so wie es kommt." rows="3"></textarea>
+    </div>
+
+    <div class="mbox">
+      <p>Oder wähle einen Satz der gerade am nächsten liegt.</p>
+    </div>
+
+    <div class="doors">
+      <button class="door" onclick="selectDoor(0)"><span class="door-num">—</span>Ich habe nur ein durchschnittliches Hotel</button>
+      <button class="door" onclick="selectDoor(1)"><span class="door-num">—</span>Ich weiß nicht wie ich mich abheben soll</button>
+      <button class="door" onclick="selectDoor(2)"><span class="door-num">—</span>Ich weiß nicht wie es weitergehen soll</button>
+      <button class="door" onclick="selectDoor(3)"><span class="door-num">—</span>Eigentlich weiß ich was ich tun müsste, aber …</button>
+      <button class="door" onclick="selectDoor(4)"><span class="door-num">—</span>Ich kann nicht investieren, habe dafür kein Geld</button>
+      <button class="door" onclick="selectDoor(5)"><span class="door-num">—</span>Wenn die Auslastung besser wäre, der Umsatz höher, dann …</button>
+      <button class="door" onclick="selectDoor(6)"><span class="door-num">—</span>Irgendwie glaube ich nicht mehr so richtig daran</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="startSpiegel()">In den Spiegelraum →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SPIEGELRAUM ══════ -->
+<div class="screen" id="s-spiegel">
+  <div class="hdr">
+    <div class="hdr-eye">DAS HOTEL entsteht</div>
+    <div class="hdr-num">2</div>
+    <div class="hdr-badge"><div class="hdr-badge-dot"></div><span class="hdr-badge-label">Sandra 2.0 — Spiegelraum</span></div>
+    <div class="hdr-title">Der Spiegelraum</div>
+    <div class="hdr-sub" id="spiegel-sub">—</div>
+  </div>
+  <div class="cnt">
+    <div class="chat-wrap" id="chat-spiegel"></div>
+    <div class="typing" id="typing-spiegel">
+      <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+    </div>
+    <div class="error-msg" id="error-spiegel">Verbindungsfehler — bitte nochmal versuchen.</div>
+    <div class="input-area" id="spiegel-input">
+      <textarea id="spiegel-msg" placeholder="Schreib was kommt …" rows="3" onkeydown="handleKey(event,'spiegel')"></textarea>
+      <button class="send-btn" id="spiegel-send" onclick="sendMsg('spiegel')">→</button>
+    </div>
+    <div class="input-hint" id="spiegel-hint">Enter zum Senden · Shift+Enter für neue Zeile</div>
+
+    <div class="zsf-box" id="zsf-box">
+      <div class="zsf-sandra">
+        <div class="zsf-sandra-text" id="zsf-text">—</div>
+      </div>
+      <div class="zsf-eigene">
+        <div class="zsf-eigene-hint">Trifft das zu — oder ist da noch etwas anderes?<br>Schreib deine eigene Erkenntnis aus diesem Gespräch.</div>
+        <textarea id="zsf-eigene-input" placeholder="Was ist deine Erkenntnis — in deinen eigenen Worten." rows="4"></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="startErkenntnis()">In den Erkenntnisraum →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ ERKENNTNISRAUM ══════ -->
+<div class="screen" id="s-erkenntnis">
+  <div class="hdr">
+    <div class="hdr-eye">DAS HOTEL entsteht</div>
+    <div class="hdr-num">3</div>
+    <div class="hdr-badge"><div class="hdr-badge-dot"></div><span class="hdr-badge-label">Sandra 2.0 — Erkenntnisraum</span></div>
+    <div class="hdr-title">Der Erkenntnisraum</div>
+    <div class="hdr-sub">Von der Erkenntnis zur Umsetzung</div>
+  </div>
+  <div class="cnt">
+    <div class="intro">Was du mitgenommen hast —<br>jetzt in die Wirkung bringen.</div>
+    <div id="erkenntnis-anker"></div>
+    <div class="div"></div>
+    <div class="chat-wrap" id="chat-erkenntnis"></div>
+    <div class="typing" id="typing-erkenntnis">
+      <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+    </div>
+    <div class="error-msg" id="error-erkenntnis">Verbindungsfehler — bitte nochmal versuchen.</div>
+    <div class="input-area" id="erkenntnis-input">
+      <textarea id="erkenntnis-msg" placeholder="Schreib was kommt …" rows="3" onkeydown="handleKey(event,'erkenntnis')"></textarea>
+      <button class="send-btn" id="erkenntnis-send" onclick="sendMsg('erkenntnis')">→</button>
+    </div>
+    <div class="input-hint">Enter zum Senden · Shift+Enter für neue Zeile</div>
+    <div class="btn-row" id="erkenntnis-weiter" style="display:none;">
+      <button class="btn" onclick="goTo('s-strategie')">In den Strategieblick →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ STRATEGIEBLICK ══════ -->
+<div class="screen" id="s-strategie">
+  <div class="hdr">
+    <div class="hdr-eye">DAS HOTEL entsteht</div>
+    <div class="hdr-num">4</div>
+    <div class="hdr-title">Der Strategieblick</div>
+    <div class="hdr-sub">Ein Blick nach vorne</div>
+  </div>
+  <div class="cnt">
+    <div class="intro">Wenn du magst —<br>was nimmst du mit aus diesem Haus?</div>
+    <div class="qblock">
+      <div class="qlabel">Die eine Sache</div>
+      <div class="qtext">Was ändert sich ab morgen — im Haus?</div>
+      <div class="qnote">Eine Sache. Die sich heute gezeigt hat.</div>
+      <div class="sofort">
+        <textarea id="st-was" placeholder="Ab morgen tue ich / lasse ich / entscheide ich …" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="qblock" style="animation-delay:.2s">
+      <div class="qlabel">Der erste Schritt</div>
+      <div class="qtext">Was kannst du noch diese Woche angehen?</div>
+      <textarea id="st-schritt" placeholder="Klein, konkret, im Haus." rows="2"></textarea>
+    </div>
+    <div class="qblock" style="animation-delay:.38s">
+      <div class="qlabel">Das Versprechen</div>
+      <div class="qtext">Wem gegenüber verpflichtest du dich?</div>
+      <div class="qnote">Dir selbst. Deinem Hotel. Deinen Gästen.</div>
+      <textarea id="st-vers" placeholder="Schreib es auf wie ein Versprechen." rows="2"></textarea>
+    </div>
+    <div class="div"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="goToFinal()">Das Haus verlassen →</button>
+      <button class="btn-ghost" onclick="goTo('s-erkenntnis')">← zurück</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ ABSCHLUSS ══════ -->
+<div class="screen" id="s-final">
+  <div class="cnt" style="padding-top:0">
+    <div class="final-wrap">
+      <div class="final-line"></div>
+      <div class="final-logo">DAS HOTEL entsteht</div>
+      <div class="final-tag">In meinen Räumen entsteht dein Hotel.</div>
+      <div class="final-msg">Du verlässt jetzt den Wahrnehmungsraum.<br>Was heute aufgestiegen ist, gehört dir.</div>
+      <div class="final-sub">Lass es setzen.<br>Schreib heute Abend auf was noch da ist —<br>nicht um Antworten zu finden,<br>sondern damit es nicht verloren geht.</div>
+      <div class="final-mitnahme" id="final-mitnahme"></div>
+      <div class="final-invite">
+        <div class="final-invite-lbl">Wenn du spürst dass da noch mehr ist</div>
+        <div class="final-invite-txt">
+          Ich biete individuelle Sessions an.<br>
+          Im Spiegelraum — mit deinem persönlichen Thema.<br>
+          Im Erkenntnisraum — mit deiner eigenen Auswertung.<br>
+          Und im Strategieraum, wo wir das in dein Hotel übersetzen.
+        </div>
+        <button class="btn" onclick="resetAll()">Neue Hausführung beginnen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+const STATE = {
+  door: null,
+  thema: '',
+  spiegel: { history: [], turn: 0, closed: false },
+  erkenntnis: { history: [], turn: 0, closed: false },
+};
+const SPIEGEL_MAX = 15;
+const ERKENNTNIS_MAX = 5;
+let busy = false;
+
+const DOORS = [
+  "Ich habe nur ein durchschnittliches Hotel",
+  "Ich weiß nicht wie ich mich abheben soll",
+  "Ich weiß nicht wie es weitergehen soll",
+  "Eigentlich weiß ich was ich tun müsste, aber …",
+  "Ich kann nicht investieren, habe dafür kein Geld",
+  "Wenn die Auslastung besser wäre, der Umsatz höher, dann …",
+  "Irgendwie glaube ich nicht mehr so richtig daran"
+];
+
+// ════════════════════════════════════════
+// SYSTEM PROMPTS
+// ════════════════════════════════════════
+function spiegelPrompt() {
+  const einstieg = STATE.door !== null
+    ? `Der Hotelier hat gewählt: "${DOORS[STATE.door]}".${STATE.thema ? ` Er hat ergänzt: "${STATE.thema}"` : ''}`
+    : `Der Hotelier: "${STATE.thema}"`;
+
+  return `Du bist Sandra 2.0 — die KI-Version der Gastgeberin von DAS HOTEL entsteht.
+Du führst inhabergeführte Hoteliers durch den Spiegelraum.
+
+${einstieg}
+
+DEIN ZIEL:
+Führe den Hotelier von seinem Einstiegsthema zum Kern: Stimmt das was er täglich in seinem Hotel tut noch mit dem überein wer er wirklich ist als Gastgeber?
+Du hast bis zu 15 Runden. Führe organisch.
+
+DEINE SPRACHE — WICHTIGSTER PUNKT:
+Du sprichst Hotelsprache. Immer. Du denkst in Häusern, Zimmern, Rezeptionen, Gästen, Frühstücken, Anreisen, Abreisen, Buchungen, Fluren, Betten.
+Nie Coaching-Sprache. Nie: "Purpose", "Kern", "Identität", "Vision", "Werte", "Für wen bist du hier".
+
+Gute Fragen klingen so:
+— "Wenn ein Gast eincheckt der einfach zu dir und zum Hotel passt — wie oft passiert das gerade?"
+— "Gibt es ein Zimmer im Haus das du besonders gerne zeigst?"
+— "Wann bist du zuletzt abends durch die Gänge gegangen und hast gedacht: genau so soll es sein?"
+— "Welcher Gast ist dir in letzter Zeit in Erinnerung geblieben — und warum gerade der?"
+— "Wie viele Gäste diese Woche haben sich so angefühlt wie du dir das vorstellst?"
+— "Was passiert an deiner Rezeption wenn jemand ankommt der einfach passt?"
+
+DRAMATURGIE:
+Phase 1 — Im Haus (Runde 1-4): Frag konkret ins Hotel hinein. Ein Zimmer, ein Gast, ein Abend, ein Moment an der Rezeption.
+Phase 2 — Die Lücke (Runde 4-8): Frag nach dem Unterschied zwischen dem was ist und dem was sein könnte. Welche Gäste kommen. Welche sollten kommen. Was das Hotel gerade ausstrahlt.
+Phase 3 — Der Schmerz (Runde 8-11): Wenn er zeigt dass etwas nicht stimmt, stelle die Zukunftsfrage im Haus: "Stell dir vor du gehst in fünf Jahren durch dein Hotel. Was siehst du — wenn sich bis dahin nichts geändert hat?" Welche Gäste. Wie fühlt sich der Morgen an.
+Phase 4 — Der Kern (Runde 11-14): "Wenn ein Gast eincheckt der wirklich zu dir und zu diesem Haus passt — wie oft passiert das? Und was bräuchte es damit das öfter passiert?"
+Abschluss (Runde 15 oder früher wenn der Kern da ist): Fasse in 2-3 Sätzen zusammen was du gehört hast. In Hotelsprache. Nur widerspiegeln — kein Rat. Beginne IMMER mit: [ABSCHLUSS]
+
+VERBOTEN: "Das ist mutig", "Gut so", "Ich höre dass", "Das klingt als ob", "Für wen bist du hier".
+FORM: 2-4 Sätze. Eine Frage. Kein Markdown. Nur Deutsch.`;
+}
+
+function erkenntnisPrompt() {
+  const zsf = document.getElementById('zsf-text').textContent;
+  const eigen = document.getElementById('zsf-eigene-input').value.trim();
+  return `Du bist Sandra 2.0 — die KI-Version der Gastgeberin von DAS HOTEL entsteht.
+
+Was du im Spiegelraum gehört hast: "${zsf}"
+Seine eigene Erkenntnis: "${eigen || 'keine formuliert'}"
+
+DEIN ZIEL: Führe ihn in 3-5 Runden von der Erkenntnis in konkrete Umsetzung — im Hotel. Nicht mehr zurückschauen. Ab morgen, im Haus.
+
+SPRACHE: Immer Hotelsprache.
+— "Was ändert sich morgen früh wenn du das Haus aufmachst?"
+— "Welches Zimmer würdest du als erstes anpacken?"
+— "Welchen Gast würdest du ab jetzt anders ansprechen — oder gar nicht mehr?"
+— "Was steht auf deiner Buchungsseite das nicht mehr zu dir passt?"
+— "Was sagst du morgen früh deinem Team?"
+
+WEG: Runde 1: Was bedeutet das konkret im Haus — ab morgen? Runde 2-3: Welches Zimmer, welcher Gast, welcher erste Schritt. Runde 4: Erster Schritt diese Woche. Abschluss Runde 5: Kurze Zusammenfassung was er sich vorgenommen hat. Beginne IMMER mit: [ABSCHLUSS]
+FORM: 2-3 Sätze. Eine Frage. Kein Markdown. Nur Deutsch.`;
+}
+
+// ════════════════════════════════════════
+// API — sauberer einzelner Call
+// ════════════════════════════════════════
+async function callAPI(room) {
+  if (busy) return;
+  busy = true;
+
+  const roomState = STATE[room];
+  const prompt = room === 'spiegel' ? spiegelPrompt() : erkenntnisPrompt();
+
+  const sendBtn = $(`${room}-send`);
+  const errorEl = $(`error-${room}`);
+  if (sendBtn) sendBtn.disabled = true;
+  if (errorEl) errorEl.classList.remove('show');
+  showTyping(room, true);
+
+  // Build messages — always clean alternating user/assistant
+  const messages = buildMessages(roomState.history);
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        system: prompt,
+        messages: messages
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const text = (data.content?.[0]?.text || '').trim();
+    if (!text) throw new Error('empty response');
+
+    showTyping(room, false);
+
+    // Store assistant response
+    roomState.history.push({ role: 'assistant', content: text });
+
+    const isAbschluss = text.startsWith('[ABSCHLUSS]');
+    const cleanText = isAbschluss ? text.replace('[ABSCHLUSS]', '').trim() : text;
+
+    appendMsg(`chat-${room}`, 'sandra', cleanText);
+
+    if (isAbschluss || roomState.turn >= SPIEGEL_MAX - 1 && room === 'spiegel' || roomState.turn >= ERKENNTNIS_MAX - 1 && room === 'erkenntnis') {
+      closeRoom(room, cleanText, isAbschluss);
+    } else {
+      if (sendBtn) sendBtn.disabled = false;
+    }
+
+  } catch (err) {
+    showTyping(room, false);
+    if (errorEl) errorEl.classList.add('show');
+    if (sendBtn) sendBtn.disabled = false;
+    console.error('API error:', err);
+  }
+
+  busy = false;
+}
+
+function buildMessages(history) {
+  // Ensure proper alternating user/assistant, start with user
+  const out = [];
+  for (const m of history) {
+    if (out.length === 0 && m.role !== 'user') continue;
+    if (out.length > 0 && out[out.length-1].role === m.role) {
+      // merge same-role consecutive messages
+      out[out.length-1].content += '\n' + m.content;
+    } else {
+      out.push({ role: m.role, content: m.content });
+    }
+  }
+  return out;
+}
+
+function closeRoom(room, text, wasAbschluss) {
+  setTimeout(() => {
+    if (room === 'spiegel') {
+      STATE.spiegel.closed = true;
+      $('zsf-text').textContent = text;
+      $('zsf-box').classList.add('show');
+      $('spiegel-input').classList.add('locked');
+      $('spiegel-hint').style.display = 'none';
+      setTimeout(() => $('zsf-box').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+    } else {
+      STATE.erkenntnis.closed = true;
+      $('erkenntnis-weiter').style.display = 'flex';
+      $('erkenntnis-input').classList.add('locked');
+      setTimeout(() => $('erkenntnis-weiter').scrollIntoView({ behavior:'smooth', block:'end' }), 100);
+    }
+  }, 400);
+}
+
+// ════════════════════════════════════════
+// SEND
+// ════════════════════════════════════════
+function sendMsg(room) {
+  if (busy) return;
+  if (room === 'spiegel' && STATE.spiegel.closed) return;
+  if (room === 'erkenntnis' && STATE.erkenntnis.closed) return;
+
+  const input = $(`${room}-msg`);
+  const text = input.value.trim();
+  if (!text) return;
+
+  appendMsg(`chat-${room}`, 'hotelier', text);
+  STATE[room].history.push({ role: 'user', content: text });
+  STATE[room].turn++;
+  input.value = '';
+
+  callAPI(room);
+}
+
+function handleKey(e, room) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(room); }
+}
+
+// ════════════════════════════════════════
+// NAVIGATION & FLOW
+// ════════════════════════════════════════
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function selectDoor(idx) {
+  STATE.door = idx;
+  document.querySelectorAll('.door').forEach((d,i) => d.classList.toggle('sel', i===idx));
+}
+
+function startSpiegel() {
+  const thema = $('l-thema').value.trim();
+  if (!thema && STATE.door === null) {
+    $('l-thema').focus();
+    $('l-thema').style.borderColor = 'rgba(184,147,90,0.7)';
+    return;
+  }
+  STATE.thema = thema;
+  const label = STATE.door !== null ? DOORS[STATE.door] : thema;
+  $('spiegel-sub').textContent = label.length > 58 ? label.slice(0,55)+'…' : label;
+
+  // First user message
+  const firstMsg = STATE.door !== null
+    ? (thema ? `${DOORS[STATE.door]} — ${thema}` : DOORS[STATE.door])
+    : thema;
+
+  STATE.spiegel.history = [{ role: 'user', content: firstMsg }];
+  STATE.spiegel.turn = 0;
+  STATE.spiegel.closed = false;
+
+  goTo('s-spiegel');
+  callAPI('spiegel');
+}
+
+function startErkenntnis() {
+  const eigen = $('zsf-eigene-input').value.trim();
+  const anker = $('erkenntnis-anker');
+  anker.innerHTML = '';
+  if (eigen) {
+    anker.innerHTML = `<div class="e-card"><div class="e-label">Deine Erkenntnis</div><div class="e-text">${eigen.replace(/\n/g,'<br>')}</div></div>`;
+  }
+
+  const firstMsg = eigen || 'Ich habe die Zusammenfassung gelesen.';
+  STATE.erkenntnis.history = [{ role: 'user', content: firstMsg }];
+  STATE.erkenntnis.turn = 0;
+  STATE.erkenntnis.closed = false;
+
+  goTo('s-erkenntnis');
+  callAPI('erkenntnis');
+}
+
+function goToFinal() {
+  const e = $('st-was').value.trim();
+  const s = $('st-schritt').value.trim();
+  const v = $('st-vers').value.trim();
+  let html = '';
+  if (e || s || v) {
+    html = '<div class="mbox" style="text-align:left;">';
+    const row = (lbl,val) => val ? `<p style="margin-bottom:14px"><span style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--brass);font-family:'Cormorant Garamond',serif;font-style:normal;display:block;margin-bottom:5px;">${lbl}</span><em>${val}</em></p>` : '';
+    html += row('Ab morgen', e) + row('Erster Schritt', s) + row('Mein Versprechen', v);
+    html += '</div>';
+  }
+  $('final-mitnahme').innerHTML = html;
+  goTo('s-final');
+}
+
+function resetAll() {
+  STATE.door = null; STATE.thema = '';
+  STATE.spiegel = { history:[], turn:0, closed:false };
+  STATE.erkenntnis = { history:[], turn:0, closed:false };
+  busy = false;
+
+  document.querySelectorAll('textarea').forEach(t => t.value = '');
+  document.querySelectorAll('.door').forEach(d => d.classList.remove('sel'));
+  ['chat-spiegel','chat-erkenntnis','erkenntnis-anker','final-mitnahme']
+    .forEach(id => { const el=$(id); if(el) el.innerHTML=''; });
+  $('zsf-box').classList.remove('show');
+  $('zsf-text').textContent = '—';
+  $('spiegel-hint').style.display = '';
+  $('erkenntnis-weiter').style.display = 'none';
+  ['spiegel-input','erkenntnis-input'].forEach(id => {
+    const el=$(id); if(el) el.classList.remove('locked');
+  });
+  ['spiegel-send','erkenntnis-send'].forEach(id => {
+    const el=$(id); if(el) el.disabled=false;
+  });
+  ['error-spiegel','error-erkenntnis'].forEach(id => {
+    const el=$(id); if(el) el.classList.remove('show');
+  });
+  $('l-thema').style.borderColor = '';
+  goTo('s-lobby');
+}
+
+// ════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════
+function $(id) { return document.getElementById(id); }
+
+function appendMsg(chatId, role, text) {
+  const chat = $(chatId);
+  const div = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  div.innerHTML = `<div class="msg-label">${role==='sandra'?'Sandra 2.0':'Du'}</div><div class="msg-text">${text.replace(/\n/g,'<br>')}</div>`;
+  chat.appendChild(div);
+  setTimeout(() => div.scrollIntoView({ behavior:'smooth', block:'end' }), 50);
+}
+
+function showTyping(room, show) {
+  const el = $(`typing-${room}`);
+  if (!el) return;
+  el.classList.toggle('show', show);
+  if (show) setTimeout(() => el.scrollIntoView({ behavior:'smooth', block:'end' }), 50);
+}
+</script>
+</body>
+</html>
